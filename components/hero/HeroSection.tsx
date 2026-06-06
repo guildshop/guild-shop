@@ -11,53 +11,6 @@ export function HeroSection() {
         borderBottom: "1px solid var(--color-fg)",
       }}
     >
-      {/* ── Three-column event info ──────────────── */}
-      <div
-        className="grid grid-cols-1 md:grid-cols-3"
-        style={{ borderBottom: "1px solid var(--color-fg)" }}
-      >
-        {[
-          { label: "What:", value: "Designers\n& Artists" },
-          { label: "Where:", value: "Shipped Worldwide" },
-          { label: "Est.:", value: "MMXXVI" },
-        ].map((col, i) => (
-          <div
-            key={i}
-            style={{
-              padding: "clamp(28px,4vw,52px) clamp(20px,3vw,40px)",
-              borderRight: i < 2 ? "1px solid var(--color-fg)" : "none",
-              borderBottom: i === 0 ? "none" : "none",
-            }}
-          >
-            <p
-              style={{
-                fontFamily: "var(--font-mono)",
-                fontSize: "11px",
-                letterSpacing: "0.1em",
-                color: "var(--color-fg-mid)",
-                marginBottom: "12px",
-                textTransform: "uppercase",
-              }}
-            >
-              {col.label}
-            </p>
-            <p
-              style={{
-                fontFamily: "'Barlow', system-ui, sans-serif",
-                fontSize: "clamp(22px, 3vw, 40px)",
-                fontWeight: 900,
-                lineHeight: 1.1,
-                color: "var(--color-fg)",
-                textTransform: "uppercase",
-                whiteSpace: "pre-line",
-              }}
-            >
-              {col.value}
-            </p>
-          </div>
-        ))}
-      </div>
-
       {/* ── Massive wordmark ─────────────────────── */}
       <div
         style={{
