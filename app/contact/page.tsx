@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Footer } from "@/components/layout/Footer";
 
 const CHANNELS = [
-  { n: "01", label: "General Inquiries", email: "founders@guildshop.co", when: "Within a day" },
+  { n: "01", label: "General Enquiry", email: "enquiry@guildshop.co", when: "Within a day" },
 ];
 
 export default function ContactPage() {
@@ -48,7 +48,7 @@ export default function ContactPage() {
             {[
               { label: "Section:", value: "Contact" },
               { label: "Reply:", value: "Within a Day" },
-              { label: "Based In:", value: "India · France · Italy" },
+              { label: "Based In:", value: "India · France" },
             ].map((col, i) => (
               <div
                 key={i}

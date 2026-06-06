@@ -19,7 +19,7 @@ export default function LoginPage() {
           {[
             { label: "Section:", value: mode === "login" ? "Returning" : "New Member" },
             { label: "Access:", value: "Members Only" },
-            { label: "Guild:", value: "Six Studios" },
+            { label: "Guild:", value: "4 Active Studios" },
           ].map((col, i) => (
             <div
               key={i}
@@ -149,7 +149,7 @@ export default function LoginPage() {
           </div>
 
           <p style={{ ...mono10dim(), marginTop: "clamp(24px,3vw,40px)", color: "var(--color-fg-mid)", lineHeight: 1.8, letterSpacing: "0.08em" }}>
-            Entry is earned, not bought. Membership grants access to the worlds of six independent designers.
+            Entry is earned, not bought. Membership grants access to the worlds of emerging independent designers.
           </p>
         </div>
       </div>

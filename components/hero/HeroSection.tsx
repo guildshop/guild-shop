@@ -19,18 +19,6 @@ export function HeroSection() {
           overflow: "hidden",
         }}
       >
-        <p
-          style={{
-            fontFamily: "var(--font-mono)",
-            fontSize: "11px",
-            letterSpacing: "0.14em",
-            color: "var(--color-fg-mid)",
-            textTransform: "uppercase",
-            marginBottom: "clamp(8px,1.5vw,16px)",
-          }}
-        >
-          A Wearable Statements Platform
-        </p>
 
         <Link href="/designers" className="block">
           <div
@@ -63,7 +51,7 @@ export function HeroSection() {
               color: "var(--color-fg-mid)",
             }}
           >
-            Six independent designers. One platform.
+            Emerging independent designers. One platform.
           </p>
           <Link
             href="/designers"

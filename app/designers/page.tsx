@@ -17,8 +17,8 @@ export default function DesignersPage() {
           >
             {[
               { label: "Section:", value: "Designers" },
-              { label: "Active:", value: "6 Studios" },
-              { label: "Based in:", value: "India · France · Italy" },
+              { label: "Active:", value: "4 Studios" },
+              { label: "Based in:", value: "India · France" },
             ].map((col, i) => (
               <div
                 key={i}

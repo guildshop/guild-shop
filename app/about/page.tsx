@@ -33,7 +33,7 @@ export default function AboutPage() {
             {[
               { label: "Section:", value: "About" },
               { label: "Est.:", value: "MMXXVI" },
-              { label: "Designers:", value: "6 Active" },
+              { label: "Designers:", value: "4 Active" },
             ].map((col, i) => (
               <div
                 key={i}

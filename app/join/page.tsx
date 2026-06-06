@@ -56,8 +56,8 @@ export default function JoinPage() {
           >
             {[
               { label: "Section:", value: "Apply" },
-              { label: "Seats:", value: "3 / 5 Open" },
-              { label: "Response:", value: "3–6 Weeks" },
+              { label: "Applications:", value: "Open" },
+              { label: "Response:", value: "1 Week" },
             ].map((col, i) => (
               <div
                 key={i}
