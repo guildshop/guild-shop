@@ -4,6 +4,7 @@ import { AnimatePresence } from "framer-motion";
 import { usePathname } from "next/navigation";
 import { useEffect } from "react";
 import Lenis from "lenis";
+import { WorldTransitionProvider } from "@/components/ui/WorldTransition";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -28,8 +29,10 @@ export function Providers({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <AnimatePresence mode="wait" initial={false}>
-      <div key={pathname}>{children}</div>
-    </AnimatePresence>
+    <WorldTransitionProvider>
+      <AnimatePresence mode="wait" initial={false}>
+        <div key={pathname}>{children}</div>
+      </AnimatePresence>
+    </WorldTransitionProvider>
   );
 }

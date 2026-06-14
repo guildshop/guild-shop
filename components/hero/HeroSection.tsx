@@ -21,18 +21,14 @@ export function HeroSection() {
       >
 
         <Link href="/designers" className="block">
-          <div
-            className="text-hero"
-            style={{ color: "var(--color-fg)", lineHeight: 0.88 }}
-          >
-            Guild
-          </div>
-          <div
-            className="text-hero"
-            style={{ color: "var(--color-fg)", lineHeight: 0.88 }}
-          >
-            Shop.
-          </div>
+          <video
+            src="/hero.mp4"
+            autoPlay
+            muted
+            loop
+            playsInline
+            style={{ display: "block", width: "100%", height: "auto" }}
+          />
         </Link>
 
         <div

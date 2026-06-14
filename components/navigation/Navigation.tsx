@@ -43,7 +43,7 @@ export function Navigation() {
           <div className="flex items-center gap-8">
             <nav className="hidden md:flex items-center gap-6">
               {[
-                { href: "/designers", label: "Designers" },
+                { href: "/designers", label: "Independent Designers / Artists" },
                 { href: "/about", label: "About" },
                 { href: "/join", label: "Join" },
               ].map((l) => (
@@ -88,19 +88,6 @@ export function Navigation() {
                 Login
               </Link>
             </nav>
-
-            <Link
-              href="/designers"
-              style={{
-                fontFamily: "var(--font-mono)",
-                fontSize: "10px",
-                letterSpacing: "0.14em",
-                color: "var(--color-fg)",
-                textTransform: "uppercase",
-              }}
-            >
-              Independent Designers / Artists
-            </Link>
 
             {/* Mobile toggle */}
             <button
