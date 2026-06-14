@@ -20,41 +20,20 @@ type Tile =
   | { type: "category"; label: string; bg: string; fg: string }
   | { type: "photo"; label?: string };
 
-// Hand-crafted grid: 3 cols, varied spans
-const GRID: Array<Tile & { col?: string; row?: string }> = [
-  { type: "designer",  slug: "vesper",      col: "span 1", row: "span 2" },
-  { type: "photo",                          col: "span 1", row: "span 1" },
-  { type: "designer",  slug: "nova-aura",   col: "span 1", row: "span 1" },
-  { type: "category",  label: "Outerwear",  bg: "#f2e4d0", fg: "#0a0a0a", col: "span 1", row: "span 1" },
-  { type: "designer",  slug: "terra",       col: "span 1", row: "span 1" },
-  { type: "designer",  slug: "lumi",        col: "span 1", row: "span 2" },
-  { type: "photo",     label: "AW 2026",    col: "span 1", row: "span 1" },
-  { type: "category",  label: "Couture",    bg: "#e4ddd4", fg: "#0a0a0a", col: "span 1", row: "span 1" },
-  { type: "designer",  slug: "soleil",      col: "span 1", row: "span 1" },
-  { type: "category",  label: "Jewellery",  bg: "#e8c8b4", fg: "#0a0a0a", col: "span 1", row: "span 1" },
-  { type: "designer",  slug: "ondo",        col: "span 1", row: "span 1" },
+// Bento layout — explicit placement on a 4-col grid so the panels tile
+// perfectly with mixed shapes: tall rectangles, wide rectangles & squares.
+//   gc = grid-column (start / span), gr = grid-row (start / span)
+const GRID: Array<{ slug: string; gc: string; gr: string }> = [
+  { slug: "vesper",    gc: "1 / span 1", gr: "1 / span 2" }, // tall rectangle
+  { slug: "nova-aura", gc: "2 / span 2", gr: "1 / span 1" }, // wide rectangle
+  { slug: "terra",     gc: "4 / span 1", gr: "1 / span 1" }, // square
+  { slug: "ondo",      gc: "2 / span 2", gr: "2 / span 2" }, // big square
+  { slug: "soleil",    gc: "4 / span 1", gr: "2 / span 2" }, // tall rectangle
+  { slug: "lumi",      gc: "1 / span 1", gr: "3 / span 1" }, // square
 ];
 
-const CELL_H = "clamp(180px, 22vw, 300px)";
+const CELL_H = "clamp(160px, 19vw, 270px)";
 const EASE = [0.16, 1, 0.3, 1] as const;
-
-// Per-tile entrance direction (matches the "blocks sliding into place" choreography)
-// index follows GRID order: vesper, photo, nova-aura, outerwear, terra, lumi,
-//                           photoAW, couture, soleil, jewellery, ondo
-// Large displacements so each block slides fully out of its slot, then returns
-const ENTER: Array<{ x: number; y: number }> = [
-  { x:  900, y:    0 }, // vesper      → slides fully right
-  { x:    0, y:  760 }, // photo       ↓ slides fully down
-  { x:    0, y: -760 }, // nova-aura   ↑ slides fully up
-  { x:  900, y:    0 }, // outerwear   → slides fully right
-  { x:    0, y:  760 }, // terra       ↓ slides fully down
-  { x:    0, y: -760 }, // lumi        ↑ slides fully up
-  { x:    0, y:  760 }, // photo AW    ↓ slides fully down
-  { x: -900, y:    0 }, // couture     ← slides fully left
-  { x:    0, y:  760 }, // soleil      ↓ slides fully down
-  { x:  900, y:    0 }, // jewellery   → slides fully right
-  { x: -900, y:    0 }, // ondo        ← slides fully left
-];
 
 export function FeaturedDesigners() {
   return (
@@ -76,34 +55,21 @@ export function FeaturedDesigners() {
       </div>
 
       {/* Bento grid */}
-      <div className="grid" style={{ gridTemplateColumns: "repeat(3, 1fr)", gap: 0 }}>
+      <div className="grid" style={{ gridTemplateColumns: "repeat(4, 1fr)", gridAutoRows: CELL_H, gap: 0 }}>
         {GRID.map((tile, i) => (
-          <motion.div
+          <div
             key={i}
             style={{
-              gridColumn: tile.col,
-              gridRow: tile.row,
-              height: tile.row === "span 2" ? `calc(${CELL_H} * 2 + 1px)` : CELL_H,
+              gridColumn: tile.gc,
+              gridRow: tile.gr,
               borderRight: "1px solid var(--color-fg)",
               borderBottom: "1px solid var(--color-fg)",
               position: "relative",
               overflow: "hidden",
             }}
-            initial={{ x: 0, y: 0 }}
-            whileInView={{
-              x: [0, ENTER[i]?.x ?? 0, ENTER[i]?.x ?? 0, 0],
-              y: [0, ENTER[i]?.y ?? -240, ENTER[i]?.y ?? -240, 0],
-            }}
-            viewport={{ once: true, margin: "-80px" }}
-            transition={{
-              duration: 0.55,
-              times: [0, 0.45, 0.55, 1],
-              ease: [[0.6, 0, 0.4, 1], "linear", [0.6, 0, 0.4, 1]],
-              delay: i * 0.02,
-            }}
           >
-            <TileContent tile={tile} />
-          </motion.div>
+            <DesignerTile slug={tile.slug} />
+          </div>
         ))}
       </div>
     </section>
