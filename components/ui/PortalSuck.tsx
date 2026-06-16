@@ -18,6 +18,13 @@ import gsap from "gsap";
 
 type Origin = { x: number; y: number };
 
+function parseColor(str: string): { r: number; g: number; b: number; a: number } {
+  const m = str.match(/rgba?\(([^)]+)\)/);
+  if (!m) return { r: 0, g: 0, b: 0, a: 0 };
+  const p = m[1].split(",").map((s) => parseFloat(s));
+  return { r: p[0] || 0, g: p[1] || 0, b: p[2] || 0, a: p[3] ?? 1 };
+}
+
 interface Props {
   origin: Origin;
   contentRef: React.RefObject<HTMLElement>;
@@ -104,27 +111,43 @@ export function PortalSuck({ origin, contentRef, onNavigate, onDone }: Props) {
       }
     }
 
-    // ── 2. Clone coloured panels, buttons & images as chunks ─────────
-    const blockEls = Array.from(
-      container.querySelectorAll<HTMLElement>(
-        "a[href^='/designers/'], button, img, [class*='grid'] > div"
-      )
-    ).slice(0, 70);
+    // ── 2. Clone every solid-coloured panel (designer tiles, buttons,
+    //       images) as a chunk that flies into the hole. We scan broadly
+    //       for any element with a solid background that isn't the page
+    //       colour, and skip nested duplicates. ─────────────────────────
+    const captured = new Set<Element>();
+    const blockEls = Array.from(container.querySelectorAll<HTMLElement>("a, div, button, img, video")).slice(0, 600);
+    let blockCount = 0;
     for (const el of blockEls) {
+      if (blockCount >= 90) break;
       const rect = el.getBoundingClientRect();
-      if (rect.width < 8 || rect.height < 8 || !inView(rect)) continue;
-      let bg = getComputedStyle(el).backgroundColor;
-      const child = el.firstElementChild as HTMLElement | null;
-      if ((bg === "rgba(0, 0, 0, 0)" || !bg) && child) bg = getComputedStyle(child).backgroundColor;
-      if (bg === "rgba(0, 0, 0, 0)" || !bg) continue;
+      if (rect.width < 40 || rect.height < 40 || !inView(rect)) continue;
+      // skip the whole-page containers
+      if (rect.width > W * 0.96 && rect.height > H * 0.9) continue;
+      // skip if an ancestor was already captured (avoid double panels)
+      let anc: Element | null = el.parentElement;
+      let nested = false;
+      while (anc) { if (captured.has(anc)) { nested = true; break; } anc = anc.parentElement; }
+      if (nested) continue;
+
+      const cs = getComputedStyle(el);
+      const isMedia = el.tagName === "IMG" || el.tagName === "VIDEO";
+      const col = parseColor(cs.backgroundColor);
+      const solid = col.a > 0.55;
+      const nearWhite = col.r > 238 && col.g > 238 && col.b > 238;
+      if (!isMedia && (!solid || nearWhite)) continue;
+
       const div = document.createElement("div");
       Object.assign(div.style, {
         position: "fixed", left: rect.left + "px", top: rect.top + "px",
-        width: rect.width + "px", height: rect.height + "px", background: bg,
-        borderRadius: getComputedStyle(el).borderRadius, willChange: "transform, opacity", pointerEvents: "none",
+        width: rect.width + "px", height: rect.height + "px",
+        background: isMedia ? "#111" : cs.backgroundColor,
+        borderRadius: cs.borderRadius, willChange: "transform, opacity", pointerEvents: "none",
       } as CSSStyleDeclaration);
       layer.appendChild(div);
       pieces.push(div);
+      captured.add(el);
+      blockCount++;
     }
 
     // Hide the real page instantly — clones stand in (no layout shift)
@@ -218,19 +241,19 @@ export function PortalSuck({ origin, contentRef, onNavigate, onDone }: Props) {
 
   return (
     <div ref={layerRef} className="fixed inset-0 z-[10000] pointer-events-none" aria-hidden>
-      {/* Portal / singularity */}
+      {/* Portal / singularity — large, centered */}
       <div
         ref={portalRef}
         style={{
-          position: "fixed", width: 90, height: 90, marginLeft: -45, marginTop: -45, borderRadius: "50%",
+          position: "fixed", width: 220, height: 220, marginLeft: -110, marginTop: -110, borderRadius: "50%",
           background:
-            "radial-gradient(circle, #000 28%, rgba(154,123,255,0.55) 46%, rgba(0,240,255,0.35) 60%, rgba(0,0,0,0) 72%)",
-          boxShadow: "0 0 40px 8px rgba(154,123,255,0.55), inset 0 0 24px rgba(0,0,0,0.9)",
+            "radial-gradient(circle, #000 30%, rgba(154,123,255,0.6) 48%, rgba(0,240,255,0.4) 62%, rgba(0,0,0,0) 74%)",
+          boxShadow: "0 0 90px 20px rgba(154,123,255,0.6), inset 0 0 60px rgba(0,0,0,0.95)",
         }}
       >
         <div
           style={{
-            position: "absolute", inset: -10, borderRadius: "50%",
+            position: "absolute", inset: -16, borderRadius: "50%",
             border: "2px solid rgba(0,240,255,0.6)", borderTopColor: "transparent", borderLeftColor: "transparent",
           }}
         />

@@ -28,8 +28,9 @@ export function WorldTransitionProvider({ children }: { children: React.ReactNod
         return;
       }
       busy.current = true;
-      const x = e?.clientX ?? window.innerWidth / 2;
-      const y = e?.clientY ?? window.innerHeight / 2;
+      // Always open the hole dead-center of the screen
+      const x = window.innerWidth / 2;
+      const y = window.innerHeight / 2;
       setTx({ x, y, href, key: Date.now() });
     },
     [router]

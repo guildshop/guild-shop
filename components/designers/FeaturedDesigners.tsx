@@ -23,13 +23,13 @@ type Tile =
 // Bento layout — explicit placement on a 4-col grid so the panels tile
 // perfectly with mixed shapes: tall rectangles, wide rectangles & squares.
 //   gc = grid-column (start / span), gr = grid-row (start / span)
-const GRID: Array<{ slug: string; gc: string; gr: string }> = [
-  { slug: "vesper",    gc: "1 / span 1", gr: "1 / span 2" }, // tall rectangle
-  { slug: "nova-aura", gc: "2 / span 2", gr: "1 / span 1" }, // wide rectangle
-  { slug: "terra",     gc: "4 / span 1", gr: "1 / span 1" }, // square
-  { slug: "ondo",      gc: "2 / span 2", gr: "2 / span 2" }, // big square
-  { slug: "soleil",    gc: "4 / span 1", gr: "2 / span 2" }, // tall rectangle
-  { slug: "lumi",      gc: "1 / span 1", gr: "3 / span 1" }, // square
+const GRID: Array<{ slug: string; gc: string; gr: string; dir: "left" | "right" }> = [
+  { slug: "vesper",    gc: "1 / span 1", gr: "1 / span 2", dir: "left"  }, // tall rectangle
+  { slug: "nova-aura", gc: "2 / span 2", gr: "1 / span 1", dir: "left"  }, // wide rectangle
+  { slug: "terra",     gc: "4 / span 1", gr: "1 / span 1", dir: "right" }, // square
+  { slug: "ondo",      gc: "2 / span 2", gr: "2 / span 2", dir: "right" }, // big square
+  { slug: "soleil",    gc: "4 / span 1", gr: "2 / span 2", dir: "right" }, // tall rectangle
+  { slug: "lumi",      gc: "1 / span 1", gr: "3 / span 1", dir: "left"  }, // square
 ];
 
 const CELL_H = "clamp(160px, 19vw, 270px)";
@@ -55,7 +55,7 @@ export function FeaturedDesigners() {
       </div>
 
       {/* Bento grid */}
-      <div className="grid" style={{ gridTemplateColumns: "repeat(4, 1fr)", gridAutoRows: CELL_H, gap: 0 }}>
+      <div className="grid" style={{ gridTemplateColumns: "repeat(4, 1fr)", gridAutoRows: CELL_H, gap: 0, overflow: "hidden" }}>
         {GRID.map((tile, i) => (
           <div
             key={i}

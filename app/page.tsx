@@ -1,6 +1,5 @@
 import { Metadata } from "next";
-import { HeroSection } from "@/components/hero/HeroSection";
-import { FeaturedDesigners } from "@/components/designers/FeaturedDesigners";
+import { HeroStage } from "@/components/hero/HeroStage";
 import { MarketplacePreview } from "@/components/sections/MarketplacePreview";
 import { AboutSection } from "@/components/sections/AboutSection";
 import { Footer } from "@/components/layout/Footer";
@@ -12,11 +11,15 @@ export const metadata: Metadata = {
 export default function HomePage() {
   return (
     <>
-      <HeroSection />
-      <FeaturedDesigners />
-      <MarketplacePreview />
-      <AboutSection />
-      <Footer />
+      {/* Pinned video hero — designer panels fly in over it on scroll */}
+      <HeroStage />
+
+      {/* The rest of the page scrolls on after the hero stage releases */}
+      <div style={{ position: "relative", zIndex: 1, background: "var(--color-bg)" }}>
+        <MarketplacePreview />
+        <AboutSection />
+        <Footer />
+      </div>
     </>
   );
 }
