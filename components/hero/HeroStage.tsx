@@ -48,9 +48,19 @@ export function HeroStage() {
     <section ref={stageRef} style={{ height: "280vh", position: "relative" }}>
       {/* Pinned viewport */}
       <div style={{ position: "sticky", top: 0, height: "100vh", overflow: "hidden", background: "#000" }}>
-        {/* Full-screen video */}
+        {/* Full-screen video — separate cut for desktop vs phone */}
         <video
+          className="hidden md:block"
           src="/hero.mp4"
+          autoPlay
+          muted
+          loop
+          playsInline
+          style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }}
+        />
+        <video
+          className="block md:hidden"
+          src="/hero-mobile.mp4"
           autoPlay
           muted
           loop
