@@ -40,9 +40,9 @@ export function HeroStage() {
     target: stageRef,
     offset: ["start start", "end start"],
   });
-  // Spring-smoothed progress — dampens quick scroll-ups so the panels hold
-  // their place and ease out instead of snapping away.
-  const smooth = useSpring(scrollYProgress, { stiffness: 70, damping: 30, mass: 0.8 });
+  // Spring-smoothed progress — snappy enough to track scroll without lag,
+  // still damped so quick scroll-ups ease rather than snap.
+  const smooth = useSpring(scrollYProgress, { stiffness: 220, damping: 40, mass: 0.35 });
 
   return (
     <section ref={stageRef} style={{ height: "280vh", position: "relative" }}>

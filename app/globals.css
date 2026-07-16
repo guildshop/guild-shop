@@ -4,6 +4,24 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,400;0,700;0,900;1,400&family=Barlow+Condensed:wght@700;900&family=Bodoni+Moda:ital,wght@0,400;0,600;0,700;0,800;0,900;1,500&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Space+Mono:ital,wght@0,400;1,400&display=swap');
 
+/* Horizontal marquee for the New Drops rows */
+@keyframes gs-marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-33.3333%); }
+}
+.gs-marquee-mask { overflow: hidden; }
+.gs-marquee-track {
+  display: flex;
+  width: max-content;
+  animation: gs-marquee var(--marquee-dur, 28s) linear infinite;
+  will-change: transform;
+}
+.gs-marquee-track.reverse { animation-direction: reverse; }
+.gs-marquee-mask:hover .gs-marquee-track { animation-play-state: paused; }
+@media (prefers-reduced-motion: reduce) {
+  .gs-marquee-track { animation: none; }
+}
+
 /* ──────────────────────────────────────────────────
    LUXURY DESIGN TOKENS
 ────────────────────────────────────────────────── */
@@ -23,24 +41,24 @@
   --color-block-blush:  #e8c8b4;
   --color-block-warm:   #e4ddd4;
 
-  /* Clean white minimal palette */
-  --color-bg:          #ffffff;
-  --color-bg-2:        #f4f4f2;
-  --color-bg-3:        #eaeae8;
-  --color-fg:          #111111;
-  --color-fg-mid:      #555555;
-  --color-fg-dim:      #777777;
-  --color-fg-subtle:   #aaaaaa;
+  /* Inverted dark minimal palette — black bg, white text */
+  --color-bg:          #0a0a0a;
+  --color-bg-2:        #141414;
+  --color-bg-3:        #1f1f1f;
+  --color-fg:          #f2f2f2;
+  --color-fg-mid:      #a8a8a8;
+  --color-fg-dim:      #888888;
+  --color-fg-subtle:   #666666;
   --color-bone:        #f0ede8;   /* warm cream — for text on dark bgs */
-  --color-accent:      #111111;
-  --color-accent-light:#333333;
-  --color-accent-dark: #000000;
+  --color-accent:      #f2f2f2;
+  --color-accent-light:#cccccc;
+  --color-accent-dark: #ffffff;
   --color-gold:        #c9a06a;
   --color-gold-light:  #e0c090;
-  --color-border:      rgba(0,0,0,0.09);
-  --color-border-light:rgba(0,0,0,0.05);
-  --color-glass:       rgba(255,255,255,0.85);
-  --color-overlay:     rgba(255,255,255,0.96);
+  --color-border:      rgba(255,255,255,0.14);
+  --color-border-light:rgba(255,255,255,0.08);
+  --color-glass:       rgba(0,0,0,0.85);
+  --color-overlay:     rgba(0,0,0,0.96);
 
   /* Motion easing */
   --ease-luxury:   cubic-bezier(0.16, 1, 0.3, 1);

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { ScriptScramble } from "./ScriptScramble";
 
 export function Footer() {
   return (
@@ -12,7 +13,7 @@ export function Footer() {
       >
         {[
           { title: "The Guild",    links: [{ href: "/about", label: "About" }, { href: "/designers", label: "Designers" }, { href: "/join", label: "Join" }, { href: "/contact", label: "Contact" }] },
-          { title: "Your Account", links: [{ href: "/login", label: "Login" }, { href: "#", label: "Orders" }, { href: "#", label: "Wishlist" }] },
+          { title: "Your Account", links: [{ href: "/login", label: "Login" }, { href: "#", label: "Orders" }] },
           { title: "Fine Print",   links: [{ href: "/terms", label: "Terms & Conditions" }] },
         ].map((group, gi) => (
           <div
@@ -64,7 +65,8 @@ export function Footer() {
           overflow: "hidden",
         }}
       >
-        <div
+        <ScriptScramble
+          text="Guild"
           style={{
             fontFamily: "'Barlow', system-ui, sans-serif",
             fontSize: "clamp(72px, 27.5vw, 9999px)",
@@ -76,10 +78,9 @@ export function Footer() {
             userSelect: "none",
             whiteSpace: "nowrap",
           }}
-        >
-          Guild
-        </div>
-        <div
+        />
+        <ScriptScramble
+          text="Shop."
           style={{
             fontFamily: "'Barlow', system-ui, sans-serif",
             fontSize: "clamp(72px, 27.5vw, 9999px)",
@@ -91,9 +92,7 @@ export function Footer() {
             userSelect: "none",
             whiteSpace: "nowrap",
           }}
-        >
-          Shop.
-        </div>
+        />
       </div>
 
       {/* ── Bottom strip ──────────────────────────── */}

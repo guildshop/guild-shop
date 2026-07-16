@@ -16,8 +16,12 @@ const BLOCK_COLORS: Record<string, { bg: string; fg: string }> = {
   ondo:        { bg: "#1a30a0", fg: "#ffffff" },
 };
 
+// Each row loops in the direction of the arrows: left, right, left
+const ROW_DIRECTION: Array<"left" | "right"> = ["left", "right", "left"];
+
 export function MarketplacePreview() {
   const products = getFeaturedProducts();
+  const rows = [products.slice(0, 4), products.slice(4, 8), products.slice(8, 12)];
 
   return (
     <section style={{ borderBottom: "1px solid var(--color-fg)" }}>
@@ -37,25 +41,36 @@ export function MarketplacePreview() {
         </Link>
       </div>
 
-      {/* 4-column product grid */}
-      <div
-        className="grid"
-        style={{ gridTemplateColumns: "repeat(4, 1fr)", gap: 0 }}
-      >
-        {products.map((product, i) => {
-          const designer = getDesigner(product.designerId)!;
-          const colors = BLOCK_COLORS[designer.slug] ?? { bg: "#111", fg: "#fff" };
-          return (
-            <ProductTile
-              key={product.id}
-              product={product}
-              designer={designer}
-              colors={colors}
-              index={i}
-            />
-          );
-        })}
-      </div>
+      {/* Three looping marquee rows */}
+      {rows.map((rowProducts, rowIdx) => (
+        <div
+          key={rowIdx}
+          className="gs-marquee-mask"
+          style={{ borderBottom: rowIdx < rows.length - 1 ? "1px solid var(--color-fg)" : "none" }}
+        >
+          <div
+            className={`gs-marquee-track${ROW_DIRECTION[rowIdx] === "right" ? " reverse" : ""}`}
+            style={{ ["--marquee-dur" as string]: "26s" }}
+          >
+            {/* 3 contiguous copies → seamless -33.33% loop */}
+            {[0, 1, 2].map((copy) =>
+              rowProducts.map((product, i) => {
+                const designer = getDesigner(product.designerId)!;
+                const colors = BLOCK_COLORS[designer.slug] ?? { bg: "#111", fg: "#fff" };
+                return (
+                  <ProductTile
+                    key={`${copy}-${product.id}`}
+                    product={product}
+                    designer={designer}
+                    colors={colors}
+                    index={rowIdx * 4 + i}
+                  />
+                );
+              })
+            )}
+          </div>
+        </div>
+      ))}
     </section>
   );
 }
@@ -94,8 +109,9 @@ function ProductTile({
       href={`/designers/${designer.slug}`}
       className="block relative"
       style={{
-        borderRight: index % 4 < 3 ? "1px solid var(--color-fg)" : "none",
-        borderBottom: "1px solid var(--color-fg)",
+        flex: "0 0 auto",
+        width: "clamp(240px, 24vw, 340px)",
+        borderRight: "1px solid var(--color-fg)",
         background: colors.bg,
         height: "clamp(200px, 26vw, 360px)",
         overflow: "hidden",

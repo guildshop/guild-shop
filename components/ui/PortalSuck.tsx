@@ -15,6 +15,7 @@
 
 import { useEffect, useRef } from "react";
 import gsap from "gsap";
+import { armAudioUnlock, playVoidSuction, playVoidThump } from "@/lib/sfx";
 
 type Origin = { x: number; y: number };
 
@@ -55,6 +56,7 @@ export function PortalSuck({ origin, contentRef, onNavigate, onDone }: Props) {
   const logoRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    armAudioUnlock();
     const layer = layerRef.current;
     const container = contentRef.current;
     const portal = portalRef.current;
@@ -159,6 +161,8 @@ export function PortalSuck({ origin, contentRef, onNavigate, onDone }: Props) {
     const portalSpin = gsap.to(portal, { rotation: 360, duration: 2.2, ease: "none", repeat: -1 });
 
     // ── 4. Suck every piece into the portal ──────────────────────────
+    // Void-suction whoosh, rising in pitch/intensity as everything is pulled
+    // in — duration matched to how long the suck takes below.
     let maxEnd = 0;
     for (const el of pieces) {
       const r = el.getBoundingClientRect();
@@ -181,6 +185,7 @@ export function PortalSuck({ origin, contentRef, onNavigate, onDone }: Props) {
         scale: 0, opacity: 0, duration: dur, delay, ease: "power2.in",
       });
     }
+    playVoidSuction(maxEnd + 0.1);
 
     // ── 5. Logo erupts from the hole and covers the screen ───────────
     // distance from the singularity to the farthest corner
@@ -201,8 +206,9 @@ export function PortalSuck({ origin, contentRef, onNavigate, onDone }: Props) {
     gsap.set(logo, { left: origin.x, top: origin.y, xPercent: -50, yPercent: -50, scale: 0, opacity: 0, rotate: -25 });
 
     const tl = gsap.timeline({ delay: maxEnd + 0.1 });
-    // portal collapse pulse
-    tl.to(portal, { scale: 1.7, duration: 0.12, ease: "power2.out" }, 0)
+    // portal collapse pulse, with a deep impact thump
+    tl.call(() => playVoidThump(), undefined, 0)
+      .to(portal, { scale: 1.7, duration: 0.12, ease: "power2.out" }, 0)
       .to(portal, { scale: 0, opacity: 0, duration: 0.16, ease: "power2.in", onComplete: () => portalSpin.kill() }, 0.12);
 
     // disc bursts out to cover the whole screen
