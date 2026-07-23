@@ -43,7 +43,9 @@ function randomGlyph(): string {
 
 export function ScriptScramble({ text, style }: { text: string; style?: React.CSSProperties }) {
   const letters = text.split("");
-  const [glyphs, setGlyphs] = useState<string[]>(() => letters.map(() => randomGlyph()));
+  // Start on the real Latin letters so server and client render identically
+  // (no hydration mismatch); the scramble only begins once mounted.
+  const [glyphs, setGlyphs] = useState<string[]>(() => letters);
   const ref = useRef<HTMLDivElement>(null);
   const runningRef = useRef(false);
 

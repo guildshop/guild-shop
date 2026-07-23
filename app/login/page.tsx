@@ -77,7 +77,7 @@ export default function LoginPage() {
                   background: "none",
                 }}
               >
-                {m === "login" ? "Sign In" : "Create Account"}
+                {m === "login" ? "Login" : "Create Account"}
               </button>
             ))}
           </div>
@@ -89,9 +89,6 @@ export default function LoginPage() {
           >
             <Field label="Email" type="email" value={form.email} onChange={(v) => update("email", v)} placeholder="you@example.com" />
             <Field label="Password" type="password" value={form.password} onChange={(v) => update("password", v)} placeholder="••••••••" />
-            {mode === "signup" && (
-              <Field label="Portfolio URL" type="url" value={form.portfolio} onChange={(v) => update("portfolio", v)} placeholder="https://" />
-            )}
 
             {mode === "login" && (
               <button

@@ -7,6 +7,7 @@ import Link from "next/link";
 import type { Designer, Product } from "@/lib/types";
 import { formatPrice } from "@/lib/utils";
 import { ProductModal } from "./VesperPage";
+import { useOpenProductFromQuery } from "@/lib/useOpenProductFromQuery";
 
 const TerraCanvas = dynamic(() => import("./TerraCanvas"), {
   ssr: false,
@@ -18,6 +19,7 @@ const TerraCanvas = dynamic(() => import("./TerraCanvas"), {
 
 export function TerraPage({ designer }: { designer: Designer }) {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  useOpenProductFromQuery(designer.products, setSelectedProduct);
   const heroRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({ target: heroRef, offset: ["start start", "end start"] });
   const heroY = useTransform(scrollYProgress, [0, 1], ["0%", "20%"]);

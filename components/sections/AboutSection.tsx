@@ -1,8 +1,12 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
+import { AnimatePresence, motion } from "framer-motion";
 
 export function AboutSection() {
+  const [newsletterOpen, setNewsletterOpen] = useState(false);
+
   return (
     <section style={{ background: "var(--color-bg)", borderBottom: "1px solid var(--color-fg)" }}>
       {/* ── Manifesto ──────────────────────────────── */}
@@ -35,8 +39,8 @@ export function AboutSection() {
             maxWidth: "900px",
           }}
         >
-          It&apos;s built for individuals who don&apos;t just buy clothes —
-          they seek out work where craft and collaboration matter.
+          Built for those who don&apos;t just wear fashion, they invest in
+          the people who create it.
         </h2>
       </div>
 
@@ -97,15 +101,17 @@ export function AboutSection() {
 
       {/* ── Newsletter CTA ─────────────────────────── */}
       <div style={{ padding: "clamp(24px,3vw,40px) var(--content-pad)" }}>
-        <a
-          href="mailto:hello@guildshop.com"
-          className="flex items-center gap-6 group"
+        <button
+          onClick={() => setNewsletterOpen(true)}
+          className="flex items-center gap-6 group w-full"
           style={{
             border: "1px solid var(--color-fg)",
             padding: "clamp(18px,2.5vw,32px) clamp(20px,3vw,40px)",
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
+            background: "none",
+            cursor: "pointer",
           }}
         >
           <div
@@ -136,7 +142,7 @@ export function AboutSection() {
             Sign Up for Our Newsletter
           </span>
           <div style={{ width: "40px" }} />
-        </a>
+        </button>
       </div>
 
       {/* ── Manifesto link ─────────────────────────── */}
@@ -172,6 +178,226 @@ export function AboutSection() {
           Apply to Join
         </Link>
       </div>
+
+      <NewsletterModal open={newsletterOpen} onClose={() => setNewsletterOpen(false)} />
     </section>
+  );
+}
+
+// ── Newsletter signup modal ───────────────────────────────────────────
+function NewsletterModal({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const [email, setEmail] = useState("");
+  const [submitted, setSubmitted] = useState(false);
+
+  const close = () => {
+    onClose();
+    // reset after the close animation finishes
+    setTimeout(() => {
+      setEmail("");
+      setSubmitted(false);
+    }, 300);
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email.trim()) return;
+    setSubmitted(true);
+  };
+
+  return (
+    <AnimatePresence>
+      {open && (
+        <motion.div
+          className="fixed inset-0 z-[200] flex items-center justify-center"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.25 }}
+        >
+          {/* Backdrop */}
+          <motion.div
+            className="absolute inset-0"
+            style={{ background: "rgba(0,0,0,0.7)" }}
+            onClick={close}
+          />
+
+          {/* Panel */}
+          <motion.div
+            className="relative"
+            style={{
+              background: "var(--color-bg)",
+              border: "1px solid var(--color-fg)",
+              width: "min(92vw, 480px)",
+              padding: "clamp(28px,4vw,44px)",
+            }}
+            initial={{ opacity: 0, y: 16, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 10, scale: 0.98 }}
+            transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+          >
+            {!submitted ? (
+              <>
+                <p
+                  style={{
+                    fontFamily: "var(--font-mono)",
+                    fontSize: "10px",
+                    letterSpacing: "0.14em",
+                    textTransform: "uppercase",
+                    color: "var(--color-fg-mid)",
+                    marginBottom: "12px",
+                  }}
+                >
+                  Stay Connected
+                </p>
+                <h3
+                  style={{
+                    fontFamily: "'Barlow', system-ui, sans-serif",
+                    fontSize: "clamp(24px, 3vw, 34px)",
+                    fontWeight: 900,
+                    textTransform: "uppercase",
+                    color: "var(--color-fg)",
+                    lineHeight: 1.05,
+                    marginBottom: "24px",
+                  }}
+                >
+                  Sign Up for Our Newsletter
+                </h3>
+
+                <form onSubmit={handleSubmit}>
+                  <label style={{ display: "block", marginBottom: "24px" }}>
+                    <span
+                      style={{
+                        fontFamily: "var(--font-mono)",
+                        fontSize: "10px",
+                        letterSpacing: "0.14em",
+                        textTransform: "uppercase",
+                        color: "var(--color-fg-mid)",
+                        display: "block",
+                        marginBottom: "8px",
+                      }}
+                    >
+                      Email
+                    </span>
+                    <input
+                      type="email"
+                      required
+                      autoFocus
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="you@example.com"
+                      style={{
+                        width: "100%",
+                        padding: "12px 0",
+                        background: "transparent",
+                        border: "none",
+                        borderBottom: "1px solid var(--color-border)",
+                        color: "var(--color-fg)",
+                        fontFamily: "var(--font-mono)",
+                        fontSize: "15px",
+                        outline: "none",
+                      }}
+                    />
+                  </label>
+
+                  <div className="flex items-center gap-3">
+                    <button
+                      type="submit"
+                      className="flex-1"
+                      style={{
+                        fontFamily: "'Barlow', system-ui, sans-serif",
+                        fontSize: "13px",
+                        fontWeight: 900,
+                        textTransform: "uppercase",
+                        letterSpacing: "0.02em",
+                        color: "var(--color-bg)",
+                        background: "var(--color-fg)",
+                        padding: "14px 20px",
+                        cursor: "pointer",
+                      }}
+                    >
+                      Subscribe
+                    </button>
+                    <button
+                      type="button"
+                      onClick={close}
+                      className="flex-1"
+                      style={{
+                        fontFamily: "var(--font-mono)",
+                        fontSize: "10px",
+                        letterSpacing: "0.14em",
+                        textTransform: "uppercase",
+                        color: "var(--color-fg-mid)",
+                        border: "1px solid var(--color-border)",
+                        background: "none",
+                        padding: "14px 20px",
+                        cursor: "pointer",
+                      }}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </form>
+              </>
+            ) : (
+              <>
+                <p
+                  style={{
+                    fontFamily: "var(--font-mono)",
+                    fontSize: "10px",
+                    letterSpacing: "0.14em",
+                    textTransform: "uppercase",
+                    color: "var(--color-fg-mid)",
+                    marginBottom: "12px",
+                  }}
+                >
+                  Confirmed
+                </p>
+                <h3
+                  style={{
+                    fontFamily: "'Barlow', system-ui, sans-serif",
+                    fontSize: "clamp(24px, 3vw, 34px)",
+                    fontWeight: 900,
+                    textTransform: "uppercase",
+                    color: "var(--color-fg)",
+                    lineHeight: 1.05,
+                    marginBottom: "16px",
+                  }}
+                >
+                  You&apos;re on the list.
+                </h3>
+                <p
+                  style={{
+                    fontFamily: "var(--font-mono)",
+                    fontSize: "12px",
+                    lineHeight: 1.7,
+                    color: "var(--color-fg-mid)",
+                    marginBottom: "24px",
+                  }}
+                >
+                  We&apos;ll send new drops and designer news to {email}.
+                </p>
+                <button
+                  onClick={close}
+                  className="w-full"
+                  style={{
+                    fontFamily: "'Barlow', system-ui, sans-serif",
+                    fontSize: "13px",
+                    fontWeight: 900,
+                    textTransform: "uppercase",
+                    letterSpacing: "0.02em",
+                    color: "var(--color-bg)",
+                    background: "var(--color-fg)",
+                    padding: "14px 20px",
+                    cursor: "pointer",
+                  }}
+                >
+                  Done
+                </button>
+              </>
+            )}
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }

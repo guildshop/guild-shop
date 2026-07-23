@@ -1,14 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 import { useCartStore } from "@/lib/cart-store";
 
 export function Navigation() {
   const { toggleCart } = useCartStore();
-  const count = useCartStore((s) => s.itemCount());
+  const storeCount = useCartStore((s) => s.itemCount());
   const [menuOpen, setMenuOpen] = useState(false);
+  // Cart count is persisted (localStorage) and can differ from the server's
+  // render, so only trust it once mounted on the client — avoids a
+  // hydration mismatch on the "Cart" label.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  const count = mounted ? storeCount : 0;
 
   return (
     <>

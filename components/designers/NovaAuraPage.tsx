@@ -7,6 +7,7 @@ import Link from "next/link";
 import type { Designer, Product } from "@/lib/types";
 import { formatPrice } from "@/lib/utils";
 import { ProductModal } from "./VesperPage";
+import { useOpenProductFromQuery } from "@/lib/useOpenProductFromQuery";
 
 // NOVA AURA — Futuristic cyber · Space Grotesk · Neon cyan + magenta · Kinetic
 // Theme: #04040f bg, #e0e8ff fg, #00f0ff accent, #ff00aa accent-2
@@ -15,6 +16,7 @@ const NovaAuraCanvas = dynamic(() => import("./NovaAuraCanvas"), { ssr: false, l
 
 export function NovaAuraPage({ designer }: { designer: Designer }) {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  useOpenProductFromQuery(designer.products, setSelectedProduct);
   const heroRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({ target: heroRef, offset: ["start start", "end start"] });
   const heroY = useTransform(scrollYProgress, [0, 1], ["0%", "30%"]);

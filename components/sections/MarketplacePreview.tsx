@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { getFeaturedProducts, getDesigner } from "@/lib/designers";
 import { formatPrice } from "@/lib/utils";
-import { useCartStore } from "@/lib/cart-store";
+import { useWorldTransition } from "@/components/ui/WorldTransition";
 
 // Muted block colors matching bento aesthetic
 const BLOCK_COLORS: Record<string, { bg: string; fg: string }> = {
@@ -87,26 +87,14 @@ function ProductTile({
   index: number;
 }) {
   const [hovered, setHovered] = useState(false);
-  const { addItem, openCart } = useCartStore();
-
-  const handleAdd = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    addItem({
-      id: product.id,
-      productId: product.id,
-      name: product.name,
-      designerName: designer.name,
-      designerSlug: designer.slug,
-      price: product.price,
-      colorway: product.colorway,
-    });
-    openCart();
-  };
+  const { enterWorld } = useWorldTransition();
+  // Deep-link straight to this product — the designer page opens its detail
+  // modal automatically when it sees the `product` query param.
+  const href = `/designers/${designer.slug}?product=${product.id}`;
 
   return (
     <Link
-      href={`/designers/${designer.slug}`}
+      href={href}
       className="block relative"
       style={{
         flex: "0 0 auto",
@@ -118,6 +106,11 @@ function ProductTile({
       }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
+      onClick={(e) => {
+        if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+        e.preventDefault();
+        enterWorld(href, designer.name, e);
+      }}
     >
       {/* Index + designer */}
       <div
@@ -140,22 +133,6 @@ function ProductTile({
           transition: "background 0.25s ease",
         }}
       >
-        {hovered && (
-          <button
-            onClick={handleAdd}
-            className="w-full flex items-center justify-between mb-2"
-            style={{
-              fontFamily: "var(--font-mono)",
-              fontSize: "9px",
-              letterSpacing: "0.12em",
-              textTransform: "uppercase",
-              color: colors.bg,
-            }}
-          >
-            <span>Add to Cart</span>
-            <span>{formatPrice(product.price)}</span>
-          </button>
-        )}
         <p
           style={{
             fontFamily: "'Barlow', system-ui, sans-serif",
