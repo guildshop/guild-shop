@@ -11,6 +11,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: true });
   } catch (err) {
     console.error("submit-newsletter error:", err);
-    return NextResponse.json({ error: "Failed to record submission" }, { status: 500 });
+    // TEMP: surface the real error for diagnosis — revert before shipping
+    const message = err instanceof Error ? err.message : String(err);
+    return NextResponse.json({ error: "Failed to record submission", debug: message }, { status: 500 });
   }
 }
