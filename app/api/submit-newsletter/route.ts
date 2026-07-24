@@ -13,6 +13,18 @@ export async function POST(req: NextRequest) {
     console.error("submit-newsletter error:", err);
     // TEMP: surface the real error for diagnosis — revert before shipping
     const message = err instanceof Error ? err.message : String(err);
-    return NextResponse.json({ error: "Failed to record submission", debug: message }, { status: 500 });
+    const id = process.env.GOOGLE_SHEETS_SPREADSHEET_ID ?? "";
+    const email = process.env.GOOGLE_SHEETS_CLIENT_EMAIL ?? "";
+    return NextResponse.json(
+      {
+        error: "Failed to record submission",
+        debug: message,
+        debugIdLen: id.length,
+        debugIdFirstLast: id ? `${id.slice(0, 6)}...${id.slice(-6)}` : "(empty)",
+        debugIdHasWhitespace: /\s/.test(id),
+        debugEmail: email,
+      },
+      { status: 500 }
+    );
   }
 }
