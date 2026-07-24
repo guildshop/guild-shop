@@ -6,9 +6,12 @@ import { google } from "googleapis";
  * Vercel project settings in production).
  */
 export async function appendRow(sheetName: string, row: (string | number)[]) {
-  const spreadsheetId = process.env.GOOGLE_SHEETS_SPREADSHEET_ID;
-  const clientEmail = process.env.GOOGLE_SHEETS_CLIENT_EMAIL;
-  const privateKey = process.env.GOOGLE_SHEETS_PRIVATE_KEY?.replace(/\\n/g, "\n");
+  // .trim() guards against stray whitespace/newlines picked up when pasting
+  // values into Vercel's env var UI (a trailing "\n" turns a valid ID into
+  // one Google can't find).
+  const spreadsheetId = process.env.GOOGLE_SHEETS_SPREADSHEET_ID?.trim();
+  const clientEmail = process.env.GOOGLE_SHEETS_CLIENT_EMAIL?.trim();
+  const privateKey = process.env.GOOGLE_SHEETS_PRIVATE_KEY?.trim().replace(/\\n/g, "\n");
 
   if (!spreadsheetId || !clientEmail || !privateKey) {
     throw new Error("Google Sheets credentials are not configured");
