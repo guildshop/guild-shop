@@ -13,6 +13,8 @@ const STEPS = [
 export default function JoinPage() {
   const [step, setStep] = useState(0);
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
   const [form, setForm] = useState({
     name: "", brandName: "", location: "", founded: "", category: "",
     description: "", portfolioUrl: "", instagramUrl: "", vision: "", email: "",
@@ -109,15 +111,32 @@ export default function JoinPage() {
 
         {/* ── Form ───────────────────────────────────── */}
         <form
-          onSubmit={(e) => { e.preventDefault(); setSubmitted(true); }}
+          onSubmit={async (e) => {
+            e.preventDefault();
+            setSubmitting(true);
+            setSubmitError("");
+            try {
+              const res = await fetch("/api/submit-join", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(form),
+              });
+              if (!res.ok) throw new Error("request failed");
+              setSubmitted(true);
+            } catch {
+              setSubmitError("Something went wrong submitting your application. Please try again.");
+            } finally {
+              setSubmitting(false);
+            }
+          }}
           style={{ padding: "clamp(24px,4vw,48px) clamp(20px,3vw,40px)" }}
         >
           <div className="grid grid-cols-1 md:grid-cols-2" style={{ gap: "0", maxWidth: "900px" }}>
             {step === 0 && <>
               <Field label="Full Name" required><Input value={form.name} onChange={(v) => update("name", v)} placeholder="Mira Hoffmann" /></Field>
               <Field label="Brand / Studio Name" required><Input value={form.brandName} onChange={(v) => update("brandName", v)} placeholder="VESPER Studio" /></Field>
-              <Field label="Location"><Input value={form.location} onChange={(v) => update("location", v)} placeholder="Berlin, Germany" /></Field>
-              <Field label="Year Founded"><Input value={form.founded} onChange={(v) => update("founded", v)} placeholder="2021" /></Field>
+              <Field label="Location" required><Input value={form.location} onChange={(v) => update("location", v)} placeholder="Berlin, Germany" /></Field>
+              <Field label="Experience"><Input value={form.founded} onChange={(v) => update("founded", v)} placeholder="5 years" /></Field>
               <Field label="Contact Email" required span2><Input type="email" value={form.email} onChange={(v) => update("email", v)} placeholder="studio@yourname.com" /></Field>
             </>}
 
@@ -132,7 +151,7 @@ export default function JoinPage() {
 
             {step === 2 && <>
               <Field label="Portfolio / Website URL" required><Input value={form.portfolioUrl} onChange={(v) => update("portfolioUrl", v)} placeholder="https://yourportfolio.com" /></Field>
-              <Field label="Instagram URL"><Input value={form.instagramUrl} onChange={(v) => update("instagramUrl", v)} placeholder="https://instagram.com/yourhandle" /></Field>
+              <Field label="Instagram URL" required><Input value={form.instagramUrl} onChange={(v) => update("instagramUrl", v)} placeholder="https://instagram.com/yourhandle" /></Field>
               <Field label="" span2>
                 <div style={{ padding: "16px 20px", border: "1px solid var(--color-fg)", background: "var(--color-bg-2)" }}>
                   <p style={{ fontFamily: "var(--font-mono)", fontSize: "9px", letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--color-fg-dim)", marginBottom: "8px" }}>Note</p>
@@ -190,6 +209,7 @@ export default function JoinPage() {
             ) : (
               <button
                 type="submit"
+                disabled={submitting}
                 style={{
                   fontFamily: "'Barlow', system-ui, sans-serif",
                   fontSize: "14px",
@@ -199,12 +219,20 @@ export default function JoinPage() {
                   padding: "14px 32px",
                   background: "var(--color-fg)",
                   color: "var(--color-bg)",
+                  opacity: submitting ? 0.6 : 1,
+                  cursor: submitting ? "default" : "pointer",
                 }}
               >
-                Submit Application →
+                {submitting ? "Submitting…" : "Submit Application →"}
               </button>
             )}
           </div>
+
+          {submitError && (
+            <p style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "#e05a4e", marginTop: "16px" }}>
+              {submitError}
+            </p>
+          )}
         </form>
       </div>
 

@@ -7,6 +7,28 @@ export default function LoginPage() {
   const [mode, setMode] = useState<"login" | "signup">("login");
   const [form, setForm] = useState({ email: "", password: "", portfolio: "" });
   const update = (k: string, v: string) => setForm((p) => ({ ...p, [k]: v }));
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
+  const [submitted, setSubmitted] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitting(true);
+    setSubmitError("");
+    try {
+      const res = await fetch("/api/submit-login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: form.email, mode }),
+      });
+      if (!res.ok) throw new Error("request failed");
+      setSubmitted(true);
+    } catch {
+      setSubmitError("Something went wrong. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   return (
     <div style={{ background: "var(--color-bg)", minHeight: "100vh", paddingTop: "var(--nav-h)" }}>
@@ -85,10 +107,21 @@ export default function LoginPage() {
           <form
             className="flex flex-col"
             style={{ gap: "clamp(20px,2.5vw,28px)", maxWidth: 460 }}
-            onSubmit={(e) => { e.preventDefault(); alert(`${mode} flow — demo only.`); }}
+            onSubmit={handleSubmit}
           >
             <Field label="Email" type="email" value={form.email} onChange={(v) => update("email", v)} placeholder="you@example.com" />
             <Field label="Password" type="password" value={form.password} onChange={(v) => update("password", v)} placeholder="••••••••" />
+
+            {submitted && (
+              <p style={{ ...mono10dim(), color: "var(--color-fg)" }}>
+                {mode === "login" ? "Signed in — demo only." : "Account created — demo only."}
+              </p>
+            )}
+            {submitError && (
+              <p style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "#e05a4e" }}>
+                {submitError}
+              </p>
+            )}
 
             {mode === "login" && (
               <button
@@ -101,6 +134,7 @@ export default function LoginPage() {
 
             <button
               type="submit"
+              disabled={submitting}
               className="w-full flex items-center justify-between"
               style={{
                 fontFamily: "'Barlow', system-ui, sans-serif",
@@ -112,10 +146,11 @@ export default function LoginPage() {
                 background: "var(--color-fg)",
                 color: "var(--color-bg)",
                 marginTop: "8px",
-                cursor: "pointer",
+                cursor: submitting ? "default" : "pointer",
+                opacity: submitting ? 0.6 : 1,
               }}
             >
-              <span>{mode === "login" ? "Sign In" : "Create Account"}</span>
+              <span>{submitting ? "Please wait…" : mode === "login" ? "Sign In" : "Create Account"}</span>
               <span>→</span>
             </button>
           </form>

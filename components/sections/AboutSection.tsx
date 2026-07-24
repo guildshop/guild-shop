@@ -57,7 +57,7 @@ export function AboutSection() {
             style={{
               padding: "clamp(24px,3.5vw,44px) var(--content-pad)",
               borderRight: i % 2 === 0 ? "1px solid var(--color-fg)" : "none",
-              borderBottom: i < 2 ? "1px solid var(--color-fg)" : "none",
+              borderBottom: "1px solid var(--color-fg)",
             }}
           >
             <span
@@ -198,10 +198,27 @@ function NewsletterModal({ open, onClose }: { open: boolean; onClose: () => void
     }, 300);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email.trim()) return;
-    setSubmitted(true);
+    setSubmitting(true);
+    setError("");
+    try {
+      const res = await fetch("/api/submit-newsletter", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+      if (!res.ok) throw new Error("request failed");
+      setSubmitted(true);
+    } catch {
+      setError("Something went wrong. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -299,9 +316,16 @@ function NewsletterModal({ open, onClose }: { open: boolean; onClose: () => void
                     />
                   </label>
 
+                  {error && (
+                    <p style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "#e05a4e", marginBottom: "16px" }}>
+                      {error}
+                    </p>
+                  )}
+
                   <div className="flex items-center gap-3">
                     <button
                       type="submit"
+                      disabled={submitting}
                       className="flex-1"
                       style={{
                         fontFamily: "'Barlow', system-ui, sans-serif",
@@ -312,10 +336,11 @@ function NewsletterModal({ open, onClose }: { open: boolean; onClose: () => void
                         color: "var(--color-bg)",
                         background: "var(--color-fg)",
                         padding: "14px 20px",
-                        cursor: "pointer",
+                        cursor: submitting ? "default" : "pointer",
+                        opacity: submitting ? 0.6 : 1,
                       }}
                     >
-                      Subscribe
+                      {submitting ? "Submitting…" : "Subscribe"}
                     </button>
                     <button
                       type="button"
