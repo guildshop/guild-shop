@@ -50,7 +50,7 @@ export function Navigation() {
             <nav className="hidden md:flex items-center gap-6">
               {[
                 { href: "/designers", label: "Independent Designers / Artists" },
-                { href: "/about", label: "About" },
+                { href: "/about", label: "Founders" },
                 { href: "/join", label: "Join" },
               ].map((l) => (
                 <Link
@@ -120,7 +120,7 @@ export function Navigation() {
           >
             {[
               { href: "/designers", label: "Designers" },
-              { href: "/about", label: "About" },
+              { href: "/about", label: "Founders" },
               { href: "/join", label: "Join" },
               { href: "/login", label: "Login" },
             ].map((l, i) => (
