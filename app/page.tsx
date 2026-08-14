@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 export default function HomePage() {
   return (
     <>
-      {/* Pinned video hero — designer panels fly in over it on scroll */}
+      {/* Sci-fi video hero — panels fly in over video on scroll */}
       <HeroStage />
 
       {/* The rest of the page scrolls on after the hero stage releases */}
