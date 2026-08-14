@@ -212,6 +212,20 @@ export function CartDrawer() {
                             >
                               {item.name}
                             </p>
+                            {item.size && (
+                              <p
+                                style={{
+                                  fontFamily: "var(--font-mono)",
+                                  fontSize: "8px",
+                                  letterSpacing: "0.14em",
+                                  textTransform: "uppercase",
+                                  color: "var(--color-fg-dim)",
+                                  marginTop: "4px",
+                                }}
+                              >
+                                Size {item.size}
+                              </p>
+                            )}
                             {item.measurements && (
                               <div style={{ marginTop: "6px" }}>
                                 <p

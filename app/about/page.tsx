@@ -72,6 +72,45 @@ export default function AboutPage() {
           </div>
         </section>
 
+        {/* ── What Is Guild Shop ────────────────────────── */}
+        <section style={{ borderBottom: "1px solid var(--color-fg)" }}>
+          <div
+            style={{
+              padding: "clamp(12px,1.5vw,18px) clamp(20px,3vw,40px)",
+              borderBottom: "1px solid var(--color-fg)",
+            }}
+          >
+            <span style={{ fontFamily: "var(--font-mono)", fontSize: "10px", letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--color-fg)" }}>
+              What Is Guild Shop
+            </span>
+          </div>
+
+          <div style={{ padding: "clamp(24px,4vw,56px) clamp(20px,3vw,40px)" }}>
+            <h2
+              style={{
+                fontFamily: "'Barlow', system-ui, sans-serif",
+                fontSize: "clamp(28px, 4.5vw, 60px)",
+                fontWeight: 900,
+                textTransform: "uppercase",
+                lineHeight: 1.05,
+                color: "var(--color-fg)",
+                maxWidth: "760px",
+                marginBottom: "clamp(16px,2.5vw,28px)",
+              }}
+            >
+              A curated home for emerging designers, not a marketplace for everyone.
+            </h2>
+            <p style={{ fontFamily: "var(--font-mono)", fontSize: "13px", lineHeight: 1.9, color: "var(--color-fg-mid)", maxWidth: "640px" }}>
+              Guild Shop is a platform and operational layer for independent fashion. We hand-pick a
+              small guild of designers, build each of them a dedicated world on this site, and handle
+              the production, logistics, and made-to-order fulfilment behind every piece — so the
+              designer can focus on the work, and the customer gets something made specifically for
+              them, not pulled off a shelf. We are not trying to be everything. We are trying to be the
+              right place for a very specific kind of fashion: considered, limited, and worth the wait.
+            </p>
+          </div>
+        </section>
+
         {/* ── Team ───────────────────────────────────── */}
         <section style={{ borderBottom: "1px solid var(--color-fg)" }}>
           <div

@@ -67,5 +67,6 @@ export interface CartItem {
   price: number;
   quantity: number;
   colorway: string;
+  size?: string;
   measurements?: Measurements;
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, Fragment } from "react";
 import dynamic from "next/dynamic";
 import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
 import Link from "next/link";
@@ -690,6 +690,10 @@ function VesperProductCard({
 }
 
 // ── Shared product detail modal (reused by all designer pages) ──────────────
+// Custom, made-to-order measurements take extra tailoring work, so they
+// carry a surcharge over the standard S/M/L/XL price.
+const MADE_TO_ORDER_SURCHARGE_RATE = 0.15;
+
 export function ProductModal({
   product,
   designer,
@@ -704,11 +708,14 @@ export function ProductModal({
   const [added, setAdded] = useState(false);
   const [measurements, setMeasurements] = useState({ chest: "", waist: "", hips: "", height: "", notes: "" });
   const [error, setError] = useState("");
+  const [selectedSize, setSelectedSize] = useState("");
+  const [sizeChartOpen, setSizeChartOpen] = useState(false);
 
   // Reset form when product changes
   useEffect(() => {
     if (product) {
       setMeasurements({ chest: "", waist: "", hips: "", height: "", notes: "" });
+      setSelectedSize("");
       setError("");
     }
   }, [product?.id]);
@@ -739,23 +746,43 @@ export function ProductModal({
     };
   }, [product]);
 
+  const hasFullMeasurements = Boolean(
+    measurements.chest && measurements.waist && measurements.hips && measurements.height
+  );
+  const hasAnyMeasurement = Boolean(
+    measurements.chest || measurements.waist || measurements.hips || measurements.height
+  );
+  // Size and custom measurements are mutually exclusive — picking one locks
+  // out the other so a customer can't submit both.
+  const sizeLocked = hasAnyMeasurement;
+  const measurementsLocked = Boolean(selectedSize);
+  const madeToOrderPrice = product
+    ? Math.round(product.price * (1 + MADE_TO_ORDER_SURCHARGE_RATE))
+    : 0;
+  const displayPrice = hasFullMeasurements ? madeToOrderPrice : (product?.price ?? 0);
+
   const handleAddToCart = () => {
     if (!product) return;
-    const { chest, waist, hips, height } = measurements;
-    if (!chest || !waist || !hips || !height) {
-      setError("Please fill in all measurements to continue.");
+    const { chest, waist, hips, height, notes } = measurements;
+    const hasSize = Boolean(selectedSize);
+
+    // Either a standard size OR full made-to-order measurements satisfies
+    // the requirement — not both.
+    if (!hasSize && !hasFullMeasurements) {
+      setError("Please select a size or enter your measurements to continue.");
       return;
     }
     setError("");
     addItem({
-      id: `${product.id}_${Date.now()}`,
+      id: `${product.id}_${selectedSize || "custom"}_${Date.now()}`,
       productId: product.id,
       name: product.name,
       designerName: designer.name,
       designerSlug: designer.slug,
-      price: product.price,
+      price: hasFullMeasurements ? madeToOrderPrice : product.price,
       colorway: product.colorway,
-      measurements: { chest, waist, hips, height, notes: measurements.notes },
+      ...(hasSize ? { size: selectedSize } : {}),
+      ...(hasFullMeasurements ? { measurements: { chest, waist, hips, height, notes } } : {}),
     });
     setAdded(true);
     setTimeout(() => {
@@ -780,7 +807,7 @@ export function ProductModal({
   return (
     <AnimatePresence>
       {product && (
-        <>
+        <Fragment key="product-modal">
           {/* Backdrop */}
           <motion.div
             className="fixed inset-0 z-50"
@@ -839,6 +866,70 @@ export function ProductModal({
                 </div>
               )}
 
+              {/* Size */}
+              <div style={{ marginBottom: 20, paddingBottom: 20, borderBottom: `1px solid ${cssVars["--d-border"]}` }}>
+                <div className="flex items-center justify-between" style={{ marginBottom: 12 }}>
+                  <p style={{ fontFamily: mono, fontSize: "9px", letterSpacing: "0.18em", textTransform: "uppercase", color: cssVars["--d-accent"] }}>
+                    Size
+                  </p>
+                  <button
+                    type="button"
+                    disabled={sizeLocked}
+                    onClick={() => setSizeChartOpen(true)}
+                    style={{
+                      fontFamily: mono,
+                      fontSize: "9px",
+                      letterSpacing: "0.1em",
+                      textTransform: "uppercase",
+                      color: cssVars["--d-fg-dim"],
+                      textDecoration: "underline",
+                      textUnderlineOffset: "3px",
+                      background: "none",
+                      border: "none",
+                      cursor: sizeLocked ? "not-allowed" : "pointer",
+                      opacity: sizeLocked ? 0.35 : 1,
+                      padding: 0,
+                    }}
+                  >
+                    Size Chart ↗
+                  </button>
+                </div>
+                <div className="flex" style={{ gap: 8 }}>
+                  {["S", "M", "L", "XL"].map((s) => {
+                    const active = selectedSize === s;
+                    return (
+                      <button
+                        key={s}
+                        type="button"
+                        disabled={sizeLocked}
+                        onClick={() => setSelectedSize((prev) => (prev === s ? "" : s))}
+                        style={{
+                          flex: 1,
+                          padding: "12px 0",
+                          fontFamily: mono,
+                          fontSize: "12px",
+                          letterSpacing: "0.08em",
+                          textTransform: "uppercase",
+                          color: active ? cssVars["--d-bg"] : cssVars["--d-fg"],
+                          background: active ? cssVars["--d-fg"] : "transparent",
+                          border: `1px solid ${active ? cssVars["--d-fg"] : cssVars["--d-border"]}`,
+                          cursor: sizeLocked ? "not-allowed" : "pointer",
+                          opacity: sizeLocked ? 0.35 : 1,
+                          transition: "all 0.15s ease",
+                        }}
+                      >
+                        {s}
+                      </button>
+                    );
+                  })}
+                </div>
+                {sizeLocked && (
+                  <p style={{ fontFamily: mono, fontSize: "9px", color: cssVars["--d-fg-dim"], opacity: 0.7, marginTop: 8 }}>
+                    Clear your measurements below to choose a standard size instead.
+                  </p>
+                )}
+              </div>
+
               {/* Measurements */}
               <div style={{ paddingTop: 4 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
@@ -848,12 +939,22 @@ export function ProductModal({
                   <span style={{ fontFamily: mono, fontSize: "8px", letterSpacing: "0.1em", textTransform: "uppercase", padding: "2px 8px", border: `1px solid ${cssVars["--d-accent"]}`, color: cssVars["--d-accent"] }}>
                     Made to Order
                   </span>
+                  <span style={{ fontFamily: mono, fontSize: "8px", letterSpacing: "0.1em", textTransform: "uppercase", color: cssVars["--d-fg-dim"], opacity: 0.6 }}>
+                    {measurementsLocked ? "Locked — size selected" : "Required if no size selected"}
+                  </span>
                 </div>
-                <p style={{ fontFamily: mono, fontSize: "11px", color: cssVars["--d-fg-dim"], lineHeight: 1.6, marginBottom: 16 }}>
-                  Each piece is crafted exclusively to your dimensions. Enter all measurements in cm.
+                <p style={{ fontFamily: mono, fontSize: "11px", color: cssVars["--d-fg-dim"], lineHeight: 1.6, marginBottom: 4 }}>
+                  {measurementsLocked
+                    ? "You've selected a standard size. Deselect it above to enter custom measurements instead."
+                    : "No standard size selected — enter your measurements in cm and we'll cut to your exact dimensions."}
                 </p>
+                {!measurementsLocked && (
+                  <p style={{ fontFamily: mono, fontSize: "9px", color: cssVars["--d-accent"], opacity: 0.85, marginBottom: 16 }}>
+                    Custom measurements add +{Math.round(MADE_TO_ORDER_SURCHARGE_RATE * 100)}% for the extra tailoring work involved.
+                  </p>
+                )}
 
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12, marginTop: measurementsLocked ? 16 : 0, opacity: measurementsLocked ? 0.35 : 1, transition: "opacity 0.15s ease" }}>
                   {[
                     { key: "chest",  label: "Chest / Bust" },
                     { key: "waist",  label: "Waist" },
@@ -866,24 +967,26 @@ export function ProductModal({
                       </label>
                       <input
                         type="number"
+                        disabled={measurementsLocked}
                         value={measurements[key as keyof typeof measurements]}
                         onChange={(e) => setMeasurements(prev => ({ ...prev, [key]: e.target.value }))}
                         placeholder="e.g. 88"
-                        style={inputStyle}
+                        style={{ ...inputStyle, cursor: measurementsLocked ? "not-allowed" : "text" }}
                       />
                     </div>
                   ))}
                 </div>
 
-                <label style={{ display: "block", fontFamily: mono, fontSize: "9px", letterSpacing: "0.14em", textTransform: "uppercase", color: cssVars["--d-fg-dim"], marginBottom: 6 }}>
+                <label style={{ display: "block", fontFamily: mono, fontSize: "9px", letterSpacing: "0.14em", textTransform: "uppercase", color: cssVars["--d-fg-dim"], marginBottom: 6, opacity: measurementsLocked ? 0.35 : 1 }}>
                   Special Notes (optional)
                 </label>
                 <textarea
+                  disabled={measurementsLocked}
                   value={measurements.notes}
                   onChange={(e) => setMeasurements(prev => ({ ...prev, notes: e.target.value }))}
                   placeholder="Any fit preferences or special requests..."
                   rows={3}
-                  style={{ ...inputStyle, resize: "none" }}
+                  style={{ ...inputStyle, resize: "none", opacity: measurementsLocked ? 0.35 : 1, cursor: measurementsLocked ? "not-allowed" : "text", transition: "opacity 0.15s ease" }}
                 />
               </div>
               </div>{/* end padding div */}
@@ -897,13 +1000,25 @@ export function ProductModal({
                 </p>
               )}
               <div className="flex items-center justify-between mb-3">
-                <p style={{ fontFamily: designer.theme.fontDisplay, fontSize: "clamp(20px, 2.5vw, 30px)", color: cssVars["--d-fg"], fontWeight: 400 }}>
-                  {formatPrice(product.price)}
-                </p>
+                <div className="flex items-baseline" style={{ gap: 8 }}>
+                  <p style={{ fontFamily: designer.theme.fontDisplay, fontSize: "clamp(20px, 2.5vw, 30px)", color: cssVars["--d-fg"], fontWeight: 400 }}>
+                    {formatPrice(displayPrice)}
+                  </p>
+                  {hasFullMeasurements && (
+                    <p style={{ fontFamily: mono, fontSize: "9px", color: cssVars["--d-fg-dim"], textDecoration: "line-through", opacity: 0.6 }}>
+                      {formatPrice(product.price)}
+                    </p>
+                  )}
+                </div>
                 <p style={{ fontFamily: mono, fontSize: "8px", letterSpacing: "0.12em", textTransform: "uppercase", color: cssVars["--d-fg-dim"] }}>
                   Edition of 40
                 </p>
               </div>
+              {hasFullMeasurements && (
+                <p style={{ fontFamily: mono, fontSize: "8px", letterSpacing: "0.08em", textTransform: "uppercase", color: cssVars["--d-accent"], marginBottom: 12, marginTop: -6 }}>
+                  +{Math.round(MADE_TO_ORDER_SURCHARGE_RATE * 100)}% for made-to-order custom fit
+                </p>
+              )}
               <motion.button
                 onClick={handleAddToCart}
                 className="w-full py-4 flex items-center justify-center"
@@ -922,6 +1037,185 @@ export function ProductModal({
               >
                 {added ? "Added to Cart ✓" : "Add to Cart →"}
               </motion.button>
+            </div>
+          </motion.div>
+        </Fragment>
+      )}
+      {product && (
+        <SizeChartModal
+          key="size-chart-modal"
+          open={sizeChartOpen}
+          onClose={() => setSizeChartOpen(false)}
+          designer={designer}
+          selectedSize={selectedSize}
+          onSelectSize={(s) => {
+            setSelectedSize(s);
+            setSizeChartOpen(false);
+          }}
+        />
+      )}
+    </AnimatePresence>
+  );
+}
+
+// ── Size chart modal ──────────────────────────────────────────────────────
+const SIZE_CHART_ROWS: Array<{ size: string; chest: string; waist: string; hips: string }> = [
+  { size: "S",  chest: "84–89",  waist: "66–71",   hips: "89–94" },
+  { size: "M",  chest: "90–95",  waist: "72–77",   hips: "95–100" },
+  { size: "L",  chest: "96–101", waist: "78–84",   hips: "101–107" },
+  { size: "XL", chest: "102–108", waist: "85–92",  hips: "108–115" },
+];
+
+function SizeChartModal({
+  open,
+  onClose,
+  designer,
+  selectedSize,
+  onSelectSize,
+}: {
+  open: boolean;
+  onClose: () => void;
+  designer: Designer;
+  selectedSize: string;
+  onSelectSize: (size: string) => void;
+}) {
+  const cssVars = designer.theme.cssVars as Record<string, string>;
+  const mono = designer.theme.fontMono;
+  const [unit, setUnit] = useState<"cm" | "in">("cm");
+
+  const toIn = (range: string) =>
+    range
+      .split("–")
+      .map((n) => (parseFloat(n) / 2.54).toFixed(1))
+      .join("–");
+
+  return (
+    <AnimatePresence>
+      {open && (
+        <>
+          <motion.div
+            className="fixed inset-0"
+            style={{ background: "rgba(0,0,0,0.8)", zIndex: 9999 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={onClose}
+          />
+          <motion.div
+            className="fixed"
+            style={{
+              left: "50%",
+              top: "50%",
+              width: "min(92vw, 480px)",
+              maxHeight: "86vh",
+              overflowY: "auto",
+              background: cssVars["--d-bg"],
+              border: `1px solid ${cssVars["--d-border"]}`,
+              zIndex: 10000,
+            }}
+            initial={{ opacity: 0, x: "-50%", y: "-46%", scale: 0.96 }}
+            animate={{ opacity: 1, x: "-50%", y: "-50%", scale: 1 }}
+            exit={{ opacity: 0, x: "-50%", y: "-46%", scale: 0.96 }}
+            transition={{ type: "spring", stiffness: 340, damping: 32 }}
+          >
+            <div style={{ padding: "22px 24px", borderBottom: `1px solid ${cssVars["--d-border"]}` }}>
+              <div className="flex items-start justify-between">
+                <div>
+                  <p style={{ fontFamily: mono, fontSize: "9px", letterSpacing: "0.18em", textTransform: "uppercase", color: cssVars["--d-accent"], marginBottom: 4 }}>
+                    {designer.name}
+                  </p>
+                  <h3 style={{ fontFamily: designer.theme.fontDisplay, fontSize: "clamp(20px, 3vw, 28px)", fontWeight: 700, color: cssVars["--d-fg"] }}>
+                    Size Chart
+                  </h3>
+                </div>
+                <button
+                  onClick={onClose}
+                  style={{ fontFamily: mono, fontSize: "12px", color: cssVars["--d-fg"], opacity: 0.4, background: "none", border: "none", cursor: "pointer" }}
+                >
+                  ✕
+                </button>
+              </div>
+
+              {/* Unit toggle */}
+              <div className="flex" style={{ gap: 6, marginTop: 14 }}>
+                {(["cm", "in"] as const).map((u) => (
+                  <button
+                    key={u}
+                    onClick={() => setUnit(u)}
+                    style={{
+                      fontFamily: mono,
+                      fontSize: "9px",
+                      letterSpacing: "0.1em",
+                      textTransform: "uppercase",
+                      padding: "5px 12px",
+                      color: unit === u ? cssVars["--d-bg"] : cssVars["--d-fg-dim"],
+                      background: unit === u ? cssVars["--d-fg"] : "transparent",
+                      border: `1px solid ${unit === u ? cssVars["--d-fg"] : cssVars["--d-border"]}`,
+                      cursor: "pointer",
+                    }}
+                  >
+                    {u}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Table */}
+            <div style={{ padding: "18px 24px 22px" }}>
+              <div style={{ display: "grid", gridTemplateColumns: "0.7fr 1fr 1fr 1fr", gap: 0 }}>
+                {["Size", "Chest", "Waist", "Hips"].map((h) => (
+                  <div
+                    key={h}
+                    style={{
+                      fontFamily: mono,
+                      fontSize: "8px",
+                      letterSpacing: "0.14em",
+                      textTransform: "uppercase",
+                      color: cssVars["--d-fg-dim"],
+                      paddingBottom: 10,
+                      borderBottom: `1px solid ${cssVars["--d-border"]}`,
+                    }}
+                  >
+                    {h}
+                  </div>
+                ))}
+
+                {SIZE_CHART_ROWS.map((row) => {
+                  const active = selectedSize === row.size;
+                  return (
+                    <Fragment key={row.size}>
+                      {(["size", "chest", "waist", "hips"] as const).map((col) => (
+                        <button
+                          key={col}
+                          onClick={() => onSelectSize(row.size)}
+                          style={{
+                            textAlign: "left",
+                            padding: "12px 4px 12px 0",
+                            borderBottom: `1px solid ${cssVars["--d-border"]}`,
+                            background: active ? `${cssVars["--d-accent"]}14` : "transparent",
+                            border: "none",
+                            borderBottomWidth: "1px",
+                            borderBottomStyle: "solid",
+                            borderBottomColor: cssVars["--d-border"],
+                            cursor: "pointer",
+                            fontFamily: mono,
+                            fontSize: col === "size" ? "12px" : "11px",
+                            fontWeight: col === "size" ? 700 : 400,
+                            color: active ? cssVars["--d-accent"] : cssVars["--d-fg"],
+                            transition: "background 0.15s ease",
+                          }}
+                        >
+                          {col === "size" ? row.size : unit === "cm" ? row[col] : toIn(row[col])}
+                        </button>
+                      ))}
+                    </Fragment>
+                  );
+                })}
+              </div>
+
+              <p style={{ fontFamily: mono, fontSize: "9px", color: cssVars["--d-fg-dim"], lineHeight: 1.7, marginTop: 16 }}>
+                Measurements are body measurements, not garment dimensions. Click a row to select that size. Between sizes? We recommend sizing up — every piece is made to order and can be tailored to your exact measurements.
+              </p>
             </div>
           </motion.div>
         </>
